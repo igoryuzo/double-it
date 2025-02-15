@@ -14,11 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Frame V2 Starter",
-  description: "A starter for Frame v2",
+  title: "Double It",
+  description: "Double It",
   openGraph: {
-    title: "Frame V2 Starter",
-    description: "A starter for Frame v2",
+    title: "Double It",
+    description: "Double it or withdraw it. Form the longest chain.",
   },
   other: {
     'fc:frame:image': `${process.env.NEXT_PUBLIC_URL}/images/feed.png`,
