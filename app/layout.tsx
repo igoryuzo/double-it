@@ -21,10 +21,10 @@ export const metadata: Metadata = {
     description: "A starter for Frame v2",
   },
   other: {
-    'fc:frame': 'vNext',
     'fc:frame:image': `${process.env.NEXT_PUBLIC_URL}/images/feed.png`,
     'fc:frame:button:1': 'Double It!',
     'fc:frame:post_url': `${process.env.NEXT_PUBLIC_URL}/api/frame`,
+    'fc:frame:version': 'vNext',
   }
 };
 
