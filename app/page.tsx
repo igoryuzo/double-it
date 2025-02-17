@@ -7,7 +7,7 @@ const frame = {
   version: "next",
   imageUrl: `${appUrl}/images/feed.png`,
   button: {
-    title: "Press Me",
+    title: "Start Chain",
     action: {
       type: "launch_frame",
       name: "Frame V2 Starter",

@@ -13,36 +13,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// const appUrl = process.env.NEXT_PUBLIC_URL;
-
-// const frame = {
-//   version: "vNext",
-//   imageUrl: `${appUrl}/images/feed.png`,
-//   button: {
-//     title: "Start",
-//     action: {
-//       type: "launch_frame",
-//       name: "Double It",
-//       url: appUrl,
-//       splashImageUrl: `${appUrl}/images/splash.png`,
-//       splashBackgroundColor: "#f7f7f7",
-//     },
-//   },
-// };
-
-// export async function generateMetadata(): Promise<Metadata> {
-//   return {
-//     title: "Double It",
-//     openGraph: {
-//       title: "Double It",
-//       description: "Double it or withdraw it. Form the longest chain.",
-//     },
-//     other: {
-//       "fc:frame": JSON.stringify(frame),
-//     },
-//   };
-// }
-
 export const metadata: Metadata = {
   title: "Double It",
   description: "Double It",
