@@ -20,6 +20,8 @@ export default function Demo() {
   console.log("Current isSignedIn state:", isSignedIn);
   console.log("Current user data:", user);
 
+  console.log("[SERVER] NEXT_PUBLIC_URL:", process.env.NEXT_PUBLIC_URL);
+  
   useEffect(() => {
     refetchUser();
   }, [isSignedIn, refetchUser]);

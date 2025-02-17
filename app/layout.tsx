@@ -58,6 +58,8 @@ export const metadata: Metadata = {
   }
 };
 
+console.log("[SERVER] NEXT_PUBLIC_URL:", process.env.NEXT_PUBLIC_URL);
+
 export default function RootLayout({
   children,
 }: Readonly<{
