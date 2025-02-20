@@ -7,13 +7,13 @@ const frame = {
   version: "next",
   imageUrl: `${appUrl}/images/feed.png`,
   button: {
-    title: "Start Chain",
+    title: "See Prototype",
     action: {
       type: "launch_frame",
-      name: "Frame V2 Starter",
+      name: "DoubleIt",
       url: appUrl,
       splashImageUrl: `${appUrl}/images/splash.png`,
-      splashBackgroundColor: "#f7f7f7",
+      splashBackgroundColor: "#FFFFFF",
     },
   },
 };

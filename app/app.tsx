@@ -2,8 +2,8 @@
 
 import dynamic from "next/dynamic";
 
-const Demo = dynamic(() => import("../components/Demo"));
+const DoubleIt = dynamic(() => import("../components/DoubleIt"));
 
 export default function App() {
-  return <Demo />;
+  return <DoubleIt />;
 }
