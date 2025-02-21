@@ -1,15 +1,77 @@
 "use client"
+import sdk from '@farcaster/frame-sdk';
+import { useEffect, useState } from 'react';
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { X, MoreHorizontal, Search } from "lucide-react";
 
-import { X, MoreHorizontal } from "lucide-react"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
-import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar"
-import { Card } from "./ui/card"
-import { useRouter } from "next/navigation"
+const NEYNAR_API_KEY = process.env.NEYNAR_API_KEY;
+console.log('API Key loaded:', NEYNAR_API_KEY);
+
+type FrameContext = {
+  user?: {
+    fid: number;
+    username?: string;
+    displayName?: string;
+    pfpUrl?: string;
+  };
+};
 
 export default function StartChain() {
-  const router = useRouter()
+  const router = useRouter();
+  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
+  const [context, setContext] = useState<FrameContext>();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Array<{
+    fid: number;
+    username: string;
+    display_name?: string;
+    pfp_url?: string;
+  }>>([]);
+  const [selectedUser, setSelectedUser] = useState<{
+    fid: number;
+    username: string;
+    display_name?: string;
+    pfp_url?: string;
+  } | null>(null);
 
+  useEffect(() => {
+    const load = async () => {
+      setContext(await sdk.context);
+      sdk.actions.ready();
+    };
+
+    if (sdk && !isSDKLoaded) {
+      setIsSDKLoaded(true);
+      load();
+    }
+  }, [isSDKLoaded]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+        const data = await response.json();
+        setSearchResults(data.result.users);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    if (searchQuery.length > 0) {
+      fetchUsers();
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
+
+  if (!isSDKLoaded) {
+    return <div>Loading...</div>;
+  }
+  console.log(context);
   return (
     <div className="min-h-screen bg-white px-6 py-4 max-w-md mx-auto">
       {/* Header */}
@@ -35,10 +97,10 @@ export default function StartChain() {
           <label className="text-[#556272] text-xl">User (Starting the chain)</label>
           <Card className="p-3 flex items-center gap-3 rounded-none">
             <Avatar className="h-8 w-8">
-              <AvatarImage src="/placeholder.svg" />
-              <AvatarFallback>IG</AvatarFallback>
+              <AvatarImage src={context?.user?.pfpUrl} />
+              <AvatarFallback>{context?.user?.displayName?.slice(0, 2) ?? 'FC'}</AvatarFallback>
             </Avatar>
-            <span className="text-[#556272]">igoryuzo.eth</span>
+            <span className="text-[#556272]">@{context?.user?.username}</span>
           </Card>
         </div>
 
@@ -54,18 +116,56 @@ export default function StartChain() {
 
         {/* Challenge User Section */}
         <div className="space-y-2">
-            <label className="text-[#556272] text-xl">Challenge User</label>
+          <label className="text-[#556272] text-xl">Challenge User</label>
+          {selectedUser ? (
             <div className="flex items-center gap-2 border border-[#d5d7da] bg-white p-3 rounded-none">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                <AvatarFallback>JP</AvatarFallback>
+                <AvatarImage src={selectedUser.pfp_url} />
+                <AvatarFallback>{selectedUser.display_name?.slice(0, 2) ?? selectedUser.username.slice(0, 2)}</AvatarFallback>
               </Avatar>
-              <span className="flex-1 text-[#414651]">@jessepollak</span>
-              <button className="pr-2">
+              <span className="flex-1 text-[#414651]">@{selectedUser.username}</span>
+              <button className="pr-2" onClick={() => {
+                setSelectedUser(null);
+                setSearchQuery('');
+              }}>
                 <X className="h-5 w-5 text-[#8997a4]" />
               </button>
             </div>
-          </div>
+          ) : (
+            <div className="relative">
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search Farcaster users..."
+                className="pl-10 pr-4 py-3 text-xl border-[#d5d7da] rounded-none h-[52px]"
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#556272]" />
+              
+              {searchResults.length > 0 && (
+                <div className="absolute w-full bg-white border border-[#d5d7da] mt-1 max-h-60 overflow-y-auto z-10">
+                  {searchResults.map((user) => (
+                    <div
+                      key={user.fid}
+                      className="p-3 flex items-center gap-3 hover:bg-gray-50 cursor-pointer"
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setSearchQuery('');
+                        setSearchResults([]);
+                      }}
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.pfp_url} />
+                        <AvatarFallback>{user.display_name?.slice(0, 2) ?? user.username.slice(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-[#556272]">@{user.username}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Start Button */}
         <Button
@@ -76,6 +176,6 @@ export default function StartChain() {
         </Button>
       </main>
     </div>
-  )
+  );
 }
 
