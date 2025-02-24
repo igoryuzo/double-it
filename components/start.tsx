@@ -8,9 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { X, MoreHorizontal, Search } from "lucide-react";
 
-const NEYNAR_API_KEY = process.env.NEYNAR_API_KEY;
-console.log('API Key loaded:', NEYNAR_API_KEY);
-
 type FrameContext = {
   user?: {
     fid: number;
