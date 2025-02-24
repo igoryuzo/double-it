@@ -3,7 +3,16 @@ import * as jose from "jose";
 import { validateQstashRequest } from "@/lib/qstash";
 
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - /api/search (allow this endpoint)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api/search|_next/static|_next/image|favicon.ico).*)',
+  ],
 };
 
 export async function middleware(req: NextRequest) {
