@@ -3,16 +3,7 @@ import * as jose from "jose";
 import { validateQstashRequest } from "@/lib/qstash";
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - /api/search (allow this endpoint)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api/search|_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ["/api/:path*"],
 };
 
 export async function middleware(req: NextRequest) {
@@ -21,10 +12,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Skip auth check for sign-in endpoint
+  // Skip auth check for specific endpoints
   if (
     req.nextUrl.pathname === "/api/sign-in" ||
     req.nextUrl.pathname === "/api/webhook" ||
+    req.nextUrl.pathname === "/api/search" ||
     req.nextUrl.pathname.includes("public") ||
     req.nextUrl.pathname.includes("og")
   ) {
