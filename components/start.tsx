@@ -53,7 +53,9 @@ export default function StartChain() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+        const baseUrl = process.env.NEXT_PUBLIC_URL || window.location.origin;
+        console.log('Base URL:', baseUrl);
+        const response = await fetch(`${baseUrl}/api/search?q=${encodeURIComponent(searchQuery)}`);
         const data = await response.json();
         setSearchResults(data.result.users);
       } catch (error) {
