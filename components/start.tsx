@@ -35,6 +35,8 @@ export default function StartChain() {
     pfp_url?: string;
   } | null>(null);
 
+  const [feedback, setFeedback] = useState<string | null>(null);
+
   useEffect(() => {
     const load = async () => {
       setContext(await sdk.context);
@@ -71,6 +73,34 @@ export default function StartChain() {
     return <div>Loading...</div>;
   }
   console.log(context);
+
+  const startAndShare = async () => {
+    if (!context || !selectedUser) {
+      setFeedback("Please select a user to challenge");
+      return;
+    }
+
+    setFeedback("Starting chain and preparing to share...");
+    console.log(`Starting chain with 0.01 USD, challenging @${selectedUser.username}`);
+
+    // Generate the Frame URL with game state
+    const frameUrl = `${process.env.NEXT_PUBLIC_URL}/start?gameId=0xABC123&pot=0.01&challenge=${encodeURIComponent(selectedUser.username)}`;
+    const warpcastComposeUrl = `https://warpcast.com/~/compose?text=I%20started%20a%20DoubleIt%20chain%20with%200.01%20USD—@${encodeURIComponent(selectedUser.username)},%20double%20it%20or%20withdraw%20it!%20${encodeURIComponent(frameUrl)}`;
+
+    try {
+      await sdk.actions.openUrl(warpcastComposeUrl);
+      setFeedback("Open Warpcast to share the challenge!");
+    } catch (error) {
+      console.error("Failed to open Warpcast compose:", error);
+      setFeedback("Sharing failed—try again manually");
+    }
+
+    setTimeout(() => {
+      setFeedback(null);
+      router.push("/share"); // Navigate to share page (front-end only)
+    }, 2000);
+  };
+  
   return (
     <div className="min-h-screen bg-white px-6 py-4 max-w-md mx-auto">
       {/* Header */}
@@ -166,10 +196,17 @@ export default function StartChain() {
           )}
         </div>
 
+        {feedback && (
+        <p className="text-sm text-[#0b89f4] animate-fade-in">
+          {feedback}
+        </p>
+        )}
+
         {/* Start Button */}
         <Button
           className="w-full text-xl py-3 bg-[#0b89f4] hover:bg-[#0b89f4]/90 rounded-none h-[52px]"
-          onClick={() => router.push("/share")}
+          onClick={startAndShare}
+          disabled={!selectedUser}
         >
           Start & Share
         </Button>
