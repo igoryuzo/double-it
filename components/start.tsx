@@ -83,7 +83,7 @@ export default function StartChain() {
     setFeedback("Starting chain and preparing to share...");
     console.log(`Starting chain with 0.01 USD, challenging @${selectedUser.username}`);
 
-    // Generate the Frame URL with game state
+    // Generate the Frame URL with game state and then share it
     const frameUrl = `${process.env.NEXT_PUBLIC_URL}/start?gameId=0xABC123&pot=0.01&challenge=${encodeURIComponent(selectedUser.username)}`;
     const warpcastComposeUrl = `https://warpcast.com/~/compose?text=I%20started%20a%20DoubleIt%20chain%20with%200.01%20USD—@${encodeURIComponent(selectedUser.username)},%20double%20it%20or%20withdraw%20it!%20${encodeURIComponent(frameUrl)}`;
 
