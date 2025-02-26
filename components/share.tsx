@@ -1,8 +1,43 @@
 "use client"
 
 import { useRouter } from 'next/navigation';
-// import { useEffect, useState } from 'react';
+import { Metadata } from "next";
 import { Button } from './ui/button';
+
+const appUrl = process.env.NEXT_PUBLIC_URL || 'https://ca67-108-27-42-53.ngrok-free.app'; // Update to Vercel URL
+
+export function generateMetadata({ searchParams }: { searchParams: { gameId?: string; pot?: string; challenge?: string } }): Metadata {
+  const pot = searchParams.pot ?? '0.01';
+  const challenge = searchParams.challenge ?? 'Unknown';
+  const gameId = searchParams.gameId ?? '0xABC123';
+
+  const frame = {
+    version: "v2", // Explicitly use "v2" for clarity
+    imageUrl: `${appUrl}/api/frame-image?pot=${encodeURIComponent(pot)}&challenge=${encodeURIComponent(challenge)}`, // Dynamic image
+    button: {
+      title: "View Challenge",
+      action: {
+        type: "launch_frame",
+        name: "DoubleIt Share",
+        url: `${appUrl}/start?gameId=${encodeURIComponent(gameId)}&pot=${encodeURIComponent(pot)}&challenge=${encodeURIComponent(challenge)}`, // Dynamic URL
+        splashImageUrl: `${appUrl}/images/splash.png`,
+        splashBackgroundColor: "#FFFFFF",
+      },
+    },
+  };
+
+  return {
+    title: "Double It Share",
+    openGraph: {
+      title: "Double It Share",
+      description: `Double it or withdraw it. Pot: ${pot} ETH, Challenge: @${challenge}`,
+      images: [`${appUrl}/api/frame-image?pot=${encodeURIComponent(pot)}&challenge=${encodeURIComponent(challenge)}`],
+    },
+    other: {
+      "fc:frame": JSON.stringify(frame),
+    },
+  };
+}
 
 export default function Share() {
   const router = useRouter();
@@ -12,7 +47,6 @@ export default function Share() {
       <div className="w-full max-w-[480px] space-y-4">
         <div className="space-y-2">
           <h1 className="text-[#414651] text-2xl font-medium">Challenge Created!</h1>
-          <p className="text-[#556272]">Share this post on Warpcast to start the game.</p>
         </div>
 
         <Button

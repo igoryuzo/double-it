@@ -4,7 +4,7 @@ import App from "./app";
 const appUrl = process.env.NEXT_PUBLIC_URL;
 
 const frame = {
-  version: "next",
+  version: "vNext",
   imageUrl: `${appUrl}/images/feed.png`,
   button: {
     title: "See Prototype",
