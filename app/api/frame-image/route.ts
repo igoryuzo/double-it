@@ -7,7 +7,7 @@ import * as React from 'react';
 
 export const runtime = 'edge';
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest): Promise<Response> {
   const { searchParams } = new URL(req.url);
   const pot = searchParams.get('pot') || '0.01';
   const challenge = searchParams.get('challenge') || 'Unknown';
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
           'Cache-Control': 'public, immutable, no-transform, max-age=60',
         }
       }
-    );
+    ) as Response;
   } catch (error) {
     console.error("Dynamic image generation failed:", error);
     return new ImageResponse(
@@ -54,6 +54,6 @@ export async function GET(req: NextRequest) {
           'Cache-Control': 'public, immutable, no-transform, max-age=60',
         }
       }
-    );
+    ) as Response;
   }
 }
