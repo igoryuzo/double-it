@@ -1,13 +1,14 @@
 "use client"
 import sdk from '@farcaster/frame-sdk';
 import { useEffect, useState } from 'react';
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { X, MoreHorizontal, Search } from "lucide-react";
-import { Metadata } from "next";
+import * as crypto from 'crypto';
+// import { Metadata } from "next";
 
 type FrameContext = {
   user?: {
@@ -18,43 +19,46 @@ type FrameContext = {
   };
 };
 
-// Export generateMetadata for /start route (unchanged from previous suggestion)
-export function generateMetadata({ searchParams }: { searchParams: { gameId?: string; pot?: string; challenge?: string } }): Metadata {
-  const appUrl = process.env.NEXT_PUBLIC_URL || 'https://ca67-108-27-42-53.ngrok-free.app'; // Update to Vercel URL
-  const pot = searchParams.pot ?? '0.01';
-  const challenge = searchParams.challenge ?? 'Unknown';
-  const gameId = searchParams.gameId ?? '0xABC123';
+// Export generateMetadata for /start route
+// export function generateMetadata({ searchParams }: { searchParams: { gameId?: string; pot?: string; challenge?: string } }): Metadata {
+//   const appUrl = process.env.NEXT_PUBLIC_URL || 'https://ca67-108-27-42-53.ngrok-free.app'; // Update to Vercel URL
+//   const pot = searchParams.pot ?? '0.01'; // Pot value in USD
+//   const challenge = searchParams.challenge ?? 'Unknown';
+//   const gameId = searchParams.gameId ?? '0xABC123';
+//   // Hardcode chain length for now (simulating 1 for start, update dynamically later)
+//   const chainLength = '1';
 
-  const frame = {
-    version: "v2",
-    imageUrl: `${appUrl}/api/frame-image?pot=${encodeURIComponent(pot)}&challenge=${encodeURIComponent(challenge)}`,
-    button: {
-      title: "Start Challenge",
-      action: {
-        type: "launch_frame",
-        name: "DoubleIt Start",
-        url: `${appUrl}/start?gameId=${encodeURIComponent(gameId)}&pot=${encodeURIComponent(pot)}&challenge=${encodeURIComponent(challenge)}`,
-        splashImageUrl: `${appUrl}/images/splash.png`,
-        splashBackgroundColor: "#FFFFFF",
-      },
-    },
-  };
+//   const frame = {
+//     version: "v2", // Use "v2" for Farcaster Frames V2
+//     imageUrl: `${appUrl}/api/frame-image?pot=${encodeURIComponent(pot)}&challenge=${encodeURIComponent(challenge)}&chainLength=${encodeURIComponent(chainLength)}`, // Dynamic image
+//     button: {
+//       title: "Make Your Move",
+//       action: {
+//         type: "launch_frame",
+//         name: "DoubleIt Action",
+//         url: `${appUrl}/start?gameId=${encodeURIComponent(gameId)}&pot=${encodeURIComponent(pot)}&challenge=${encodeURIComponent(challenge)}`, // Points to an HTML page
+//         splashImageUrl: `${appUrl}/images/splash.png`,
+//         splashBackgroundColor: "#FFFFFF",
+//       },
+//     },
+//   }
 
-  return {
-    title: "Double It Start",
-    openGraph: {
-      title: "Double It Start",
-      description: `Double it or withdraw it. Pot: ${pot} ETH, Challenge: @${challenge}`,
-      images: [`${appUrl}/api/frame-image?pot=${encodeURIComponent(pot)}&challenge=${encodeURIComponent(challenge)}`],
-    },
-    other: {
-      "fc:frame": JSON.stringify(frame),
-    },
-  };
-}
+//   return {
+//     title: "Double It Start",
+//     openGraph: {
+//       title: "Double It Start",
+//       description: `Double it or withdraw it. Pot: $${pot}, Chain Length: ${chainLength}, Challenge: @${challenge}`,
+//       images: [`${appUrl}/api/frame-image?pot=${encodeURIComponent(pot)}&challenge=${encodeURIComponent(challenge)}&chainLength=${encodeURIComponent(chainLength)}`],
+//     },
+//     other: {
+//       "fc:frame": JSON.stringify(frame), // Single JSON object for Farcaster V2
+//     },
+//   };
+// }
 
 export default function StartChain() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [context, setContext] = useState<FrameContext>();
   const [searchQuery, setSearchQuery] = useState('');
@@ -105,6 +109,18 @@ export default function StartChain() {
     }
   }, [searchQuery]);
 
+  // Simulate URL refresh on component mount
+  useEffect(() => {
+    const challenge = searchParams.get('challenge');
+    const pot = searchParams.get('pot');
+    const gameId = searchParams.get('gameId');
+    
+    if (challenge && pot && gameId) {
+      const currentUrl = window.location.href;
+      router.replace(currentUrl);
+    }
+  }, [router, searchParams]);
+
   if (!isSDKLoaded) {
     return <div>Loading...</div>;
   }
@@ -119,9 +135,14 @@ export default function StartChain() {
     setFeedback("Starting chain and preparing to share...");
     console.log(`Starting chain with 0.01 USD, challenging @${selectedUser.username}`);
 
-    // Correct Frame URL with dynamic query parameters
-    const frameUrl = `${process.env.NEXT_PUBLIC_URL}/start?gameId=0xABC123&pot=0.01&challenge=${encodeURIComponent(selectedUser.username)}`;
-    const warpcastComposeUrl = `https://warpcast.com/~/compose?text=I%20started%20a%20DoubleIt%20chain%20with%200.01%20USD—@${encodeURIComponent(selectedUser.username)},%20double%20it%20or%20withdraw%20it!%20${encodeURIComponent(frameUrl)}`;
+    // Generate random game ID
+    const gameId = crypto.randomBytes(8).toString('hex');
+
+    // Create clean URL without any extra characters
+    const shareUrl = `${process.env.NEXT_PUBLIC_URL}/start?gameId=${gameId}&pot=0.01&challenge=${selectedUser.username}`;
+    // Remove trailing space but keep cursor at end
+    const text = `I started a DoubleIt chain with 0.01 USD—@${selectedUser.username}, double it or withdraw it! ${shareUrl}`;
+    const warpcastComposeUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&cursor=${text.length}`;
 
     try {
       await sdk.actions.openUrl(warpcastComposeUrl);
@@ -133,7 +154,7 @@ export default function StartChain() {
 
     setTimeout(() => {
       setFeedback(null);
-      router.push(`/share?gameId=0xABC123&pot=0.01&challenge=${encodeURIComponent(selectedUser.username)}`);
+      router.push(`/share?gameId=${gameId}&pot=0.01&challenge=${encodeURIComponent(selectedUser.username)}`);
     }, 2000);
   };
   
